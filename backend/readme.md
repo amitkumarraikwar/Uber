@@ -1,0 +1,142 @@
+# `/users/register` Endpoint Documentation
+
+## Endpoint Description
+
+The `/users/register` endpoint is used to register a new user in the system. It accepts user details, validates the input, hashes the password, and creates a new user record in the database. Upon successful registration, it returns an authentication token and the user details.
+
+---
+
+## HTTP Method
+
+**POST**
+
+---
+
+## URL
+
+```
+/users/register
+```
+
+---
+
+## Request Body
+
+The endpoint expects the following JSON structure in the request body:
+
+```json
+{
+  "fullName": {
+    "firstName": "string (min length: 3)",
+    "lastName": "string (optional, min length: 3)"
+  },
+  "email": "string (valid email format, min length: 11)",
+  "password": "string (min length: 6)"
+}
+```
+
+### Validation Rules:
+
+- **`fullName.firstName`**: Must be at least 3 characters long.
+- **`fullName.lastName`**: Optional, but if provided, must be at least 3 characters long.
+- **`email`**: Must be a valid email format and at least 11 characters long.
+- **`password`**: Must be at least 6 characters long.
+
+---
+
+## Response
+
+### Success Response
+
+**Status Code**: `201 Created`
+
+**Response Body**:
+
+```json
+{
+  "token": "string (JWT token)",
+  "user": {
+    "_id": "string (user ID)",
+    "fullName": {
+      "firstName": "string",
+      "lastName": "string"
+    },
+    "email": "string"
+  }
+}
+```
+
+### Error Responses
+
+#### Validation Error
+
+**Status Code**: `400 Bad Request`
+
+**Response Body**:
+
+```json
+{
+  "errors": [
+    {
+      "msg": "string (error message)",
+      "param": "string (field name)",
+      "location": "string (location of the error, e.g., 'body')"
+    }
+  ]
+}
+```
+
+#### Missing Required Fields
+
+**Status Code**: `400 Bad Request`
+
+**Response Body**:
+
+```json
+{
+  "message": "All fields are required"
+}
+```
+
+---
+
+## Example Usage
+
+### Request
+
+```bash
+curl -X POST http://localhost:3000/users/register \
+-H "Content-Type: application/json" \
+-d '{
+  "fullName": {
+    "firstName": "John",
+    "lastName": "Doe"
+  },
+  "email": "john.doe@example.com",
+  "password": "securepassword123"
+}'
+```
+
+### Response
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "60d0fe4f5311236168a109ca",
+    "fullName": {
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "email": "john.doe@example.com"
+  }
+}
+```
+
+---
+
+## Notes
+
+- Ensure the `JWT_SECRET` environment variable is set for token generation.
+- Passwords are hashed before being stored in the database for security.
+- The endpoint uses `express-validator` for input validation.
