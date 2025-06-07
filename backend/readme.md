@@ -277,3 +277,174 @@ curl -X POST http://localhost:3000/users/login \
 - Ensure the `JWT_SECRET` environment variable is set for token generation.
 - Passwords are securely compared using bcrypt.
 - The endpoint uses `express-validator` for input validation.
+
+---
+
+## `/users/profile` Endpoint Documentation
+
+### Endpoint Description
+
+The `/users/profile` endpoint is used to retrieve the authenticated user's profile information.
+
+---
+
+### HTTP Method
+
+**GET**
+
+---
+
+### URL
+
+```
+/users/profile
+```
+
+---
+
+### Authentication
+
+This endpoint requires the user to be authenticated. A valid JWT token must be provided in the `Authorization` header or as a cookie.
+
+---
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+
+**Response Body**:
+
+```json
+{
+  "_id": "string (user ID)",
+  "fullName": {
+    "firstName": "string",
+    "lastName": "string"
+  },
+  "email": "string"
+}
+```
+
+#### Error Responses
+
+##### Unauthorized Access
+
+**Status Code**: `401 Unauthorized`
+
+**Response Body**:
+
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### Example Usage
+
+#### Request
+
+```bash
+curl -X GET http://localhost:3000/users/profile \
+-H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Response
+
+```json
+{
+  "_id": "60d0fe4f5311236168a109ca",
+  "fullName": {
+    "firstName": "John",
+    "lastName": "Doe"
+  },
+  "email": "john.doe@example.com"
+}
+```
+
+---
+
+## `/users/logout` Endpoint Documentation
+
+### Endpoint Description
+
+The `/users/logout` endpoint is used to log out the authenticated user by clearing the authentication token and blacklisting it.
+
+---
+
+### HTTP Method
+
+**GET**
+
+---
+
+### URL
+
+```
+/users/logout
+```
+
+---
+
+### Authentication
+
+This endpoint requires the user to be authenticated. A valid JWT token must be provided in the `Authorization` header or as a cookie.
+
+---
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+
+**Response Body**:
+
+```json
+{
+  "message": "Logged out"
+}
+```
+
+#### Error Responses
+
+##### Missing Token
+
+**Status Code**: `400 Bad Request`
+
+**Response Body**:
+
+```json
+{
+  "message": "No token found"
+}
+```
+
+---
+
+### Example Usage
+
+#### Request
+
+```bash
+curl -X GET http://localhost:3000/users/logout \
+-H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Response
+
+```json
+{
+  "message": "Logged out"
+}
+```
+
+---
+
+### Notes
+
+- The token is blacklisted to prevent reuse.
+- Blacklisted tokens expire after 24 hours.
