@@ -621,3 +621,337 @@ curl -X POST http://localhost:3000/captains/register \
 - Ensure the `JWT_SECRET` environment variable is set for token generation.
 - Passwords are hashed before being stored in the database for security.
 - The endpoint uses `express-validator` for input validation.
+
+## `/captains/login` Endpoint Documentation
+
+### Endpoint Description
+
+The `/captains/login` endpoint is used to authenticate an existing captain. It validates the provided email and password, checks the credentials against the database, and returns an authentication token if the login is successful.
+
+---
+
+### HTTP Method
+
+**POST**
+
+---
+
+### URL
+
+```
+/captains/login
+```
+
+---
+
+### Request Body
+
+The endpoint expects the following JSON structure in the request body:
+
+```json
+{
+  "email": "string (valid email format)",
+  "password": "string (min length: 6)"
+}
+```
+
+### Validation Rules:
+
+- **`email`**: Must be a valid email format.
+- **`password`**: Must be at least 6 characters long.
+
+---
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+
+**Response Body**:
+
+```json
+{
+  "token": "string (JWT token)",
+  "captain": {
+    "_id": "string (captain ID)",
+    "fullName": {
+      "firstName": "string",
+      "lastName": "string"
+    },
+    "email": "string",
+    "vehicle": {
+      "color": "string",
+      "plate": "string",
+      "capacity": "integer",
+      "vehicleType": "string"
+    }
+  }
+}
+```
+
+#### Error Responses
+
+##### Validation Error
+
+**Status Code**: `400 Bad Request`
+
+**Response Body**:
+
+```json
+{
+  "errors": [
+    {
+      "msg": "string (error message)",
+      "param": "string (field name)",
+      "location": "string (location of the error, e.g., 'body')"
+    }
+  ]
+}
+```
+
+##### Invalid Credentials
+
+**Status Code**: `401 Unauthorized`
+
+**Response Body**:
+
+```json
+{
+  "message": "Invalid email or password"
+}
+```
+
+---
+
+### Example Usage
+
+#### Request
+
+```bash
+curl -X POST http://localhost:3000/captains/login \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "jane.doe@example.com",
+  "password": "securepassword123"
+}'
+```
+
+#### Response
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "captain": {
+    "_id": "60d0fe4f5311236168a109cb",
+    "fullName": {
+      "firstName": "Jane",
+      "lastName": "Doe"
+    },
+    "email": "jane.doe@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "ABC123",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+  }
+}
+```
+
+---
+
+### Notes
+
+- Ensure the `JWT_SECRET` environment variable is set for token generation.
+- Passwords are securely compared using bcrypt.
+- The endpoint uses `express-validator` for input validation.
+
+---
+
+## `/captains/profile` Endpoint Documentation
+
+### Endpoint Description
+
+The `/captains/profile` endpoint is used to retrieve the authenticated captain's profile information.
+
+---
+
+### HTTP Method
+
+**GET**
+
+---
+
+### URL
+
+```
+/captains/profile
+```
+
+---
+
+### Authentication
+
+This endpoint requires the captain to be authenticated. A valid JWT token must be provided in the `Authorization` header or as a cookie.
+
+---
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+
+**Response Body**:
+
+```json
+{
+  "captain": {
+    "_id": "string (captain ID)",
+    "fullName": {
+      "firstName": "string",
+      "lastName": "string"
+    },
+    "email": "string",
+    "vehicle": {
+      "color": "string",
+      "plate": "string",
+      "capacity": "integer",
+      "vehicleType": "string"
+    },
+    "status": "string (active/inactive)"
+  }
+}
+```
+
+#### Error Responses
+
+##### Unauthorized Access
+
+**Status Code**: `401 Unauthorized`
+
+**Response Body**:
+
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### Example Usage
+
+#### Request
+
+```bash
+curl -X GET http://localhost:3000/captains/profile \
+-H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Response
+
+```json
+{
+  "captain": {
+    "_id": "60d0fe4f5311236168a109cb",
+    "fullName": {
+      "firstName": "Jane",
+      "lastName": "Doe"
+    },
+    "email": "jane.doe@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "ABC123",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "active"
+  }
+}
+```
+
+---
+
+## `/captains/logout` Endpoint Documentation
+
+### Endpoint Description
+
+The `/captains/logout` endpoint is used to log out the authenticated captain by clearing the authentication token and blacklisting it.
+
+---
+
+### HTTP Method
+
+**GET**
+
+---
+
+### URL
+
+```
+/captains/logout
+```
+
+---
+
+### Authentication
+
+This endpoint requires the captain to be authenticated. A valid JWT token must be provided in the `Authorization` header or as a cookie.
+
+---
+
+### Response
+
+#### Success Response
+
+**Status Code**: `200 OK`
+
+**Response Body**:
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+#### Error Responses
+
+##### Missing Token
+
+**Status Code**: `400 Bad Request`
+
+**Response Body**:
+
+```json
+{
+  "message": "No token found"
+}
+```
+
+---
+
+### Example Usage
+
+#### Request
+
+```bash
+curl -X GET http://localhost:3000/captains/logout \
+-H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+#### Response
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+---
+
+### Notes
+
+- The token is blacklisted to prevent reuse.
+- Blacklisted tokens expire after 24 hours.
