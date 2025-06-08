@@ -1,4 +1,4 @@
-# API Documentation
+# User API Documentation
 
 ## `/users/register` Endpoint Documentation
 
@@ -448,3 +448,176 @@ curl -X GET http://localhost:3000/users/logout \
 
 - The token is blacklisted to prevent reuse.
 - Blacklisted tokens expire after 24 hours.
+
+# Captain API Documentation
+
+## `/captains/register` Endpoint Documentation
+
+### Endpoint Description
+
+The `/captains/register` endpoint is used to register a new captain in the system. Captains are drivers who provide transportation services. This endpoint accepts captain details, validates the input, hashes the password, and creates a new captain record in the database. Upon successful registration, it returns an authentication token and the captain details.
+
+---
+
+### HTTP Method
+
+**POST**
+
+---
+
+### URL
+
+```
+/captains/register
+```
+
+---
+
+### Request Body
+
+The endpoint expects the following JSON structure in the request body:
+
+```json
+{
+  "fullName": {
+    "firstName": "string (min length: 3)",
+    "lastName": "string (optional, min length: 3)"
+  },
+  "email": "string (valid email format)",
+  "password": "string (min length: 6)",
+  "vehicle": {
+    "color": "string (min length: 3)",
+    "plate": "string (min length: 3)",
+    "capacity": "integer (min: 1)",
+    "vehicleType": "string (must be one of: car, bike, auto)"
+  }
+}
+```
+
+### Validation Rules:
+
+- **`fullName.firstName`**: Must be at least 3 characters long.
+- **`fullName.lastName`**: Optional, but if provided, must be at least 3 characters long.
+- **`email`**: Must be a valid email format.
+- **`password`**: Must be at least 6 characters long.
+- **`vehicle.color`**: Must be at least 3 characters long.
+- **`vehicle.plate`**: Must be at least 3 characters long.
+- **`vehicle.capacity`**: Must be a positive integer (minimum value: 1).
+- **`vehicle.vehicleType`**: Must be one of the following: `car`, `bike`, `auto`.
+
+---
+
+### Response
+
+#### Success Response
+
+**Status Code**: `201 Created`
+
+**Response Body**:
+
+```json
+{
+  "token": "string (JWT token)",
+  "captain": {
+    "_id": "string (captain ID)",
+    "fullName": {
+      "firstName": "string",
+      "lastName": "string"
+    },
+    "email": "string",
+    "vehicle": {
+      "color": "string",
+      "plate": "string",
+      "capacity": "integer",
+      "vehicleType": "string"
+    }
+  }
+}
+```
+
+#### Error Responses
+
+##### Validation Error
+
+**Status Code**: `400 Bad Request`
+
+**Response Body**:
+
+```json
+{
+  "errors": [
+    {
+      "msg": "string (error message)",
+      "param": "string (field name)",
+      "location": "string (location of the error, e.g., 'body')"
+    }
+  ]
+}
+```
+
+##### Captain Already Exists
+
+**Status Code**: `400 Bad Request`
+
+**Response Body**:
+
+```json
+{
+  "message": "Captain already exists"
+}
+```
+
+---
+
+### Example Usage
+
+#### Request
+
+```bash
+curl -X POST http://localhost:3000/captains/register \
+-H "Content-Type: application/json" \
+-d '{
+  "fullName": {
+    "firstName": "Jane",
+    "lastName": "Doe"
+  },
+  "email": "jane.doe@example.com",
+  "password": "securepassword123",
+  "vehicle": {
+    "color": "Red",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}'
+```
+
+#### Response
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "captain": {
+    "_id": "60d0fe4f5311236168a109cb",
+    "fullName": {
+      "firstName": "Jane",
+      "lastName": "Doe"
+    },
+    "email": "jane.doe@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "ABC123",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+  }
+}
+```
+
+---
+
+### Notes
+
+- Ensure the `JWT_SECRET` environment variable is set for token generation.
+- Passwords are hashed before being stored in the database for security.
+- The endpoint uses `express-validator` for input validation.
